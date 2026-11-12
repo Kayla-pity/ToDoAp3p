@@ -1,4 +1,4 @@
-import react, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -15,19 +15,27 @@ export default function App() {
   };
 
 
-const salvarDadosLocal = async () => {
-  const listaString = JSON.stringify(listaTarefas);
-  await AsyncStorage.setItem('minhas_tarefas', listaString);
-  
- }
+const salvarDadosLocal = async (listaDeDados) => {
+  try {
+  const dadosJSON = JSON.stringify(listaDeDados);
+  await AsyncStorage.setItem('minhas_tarefas', dadosJSON);
+  } catch (error) {
+    console.error("erro ao salvar dados: ", error);
+  }
+};
  const resgatarDadosLocal = async () => {
+  try{
   const listaString = await AsyncStorage.getItem('minhas_tarefas');
-  if (listaString) {
+  if (listaString !== null) {
     setListaTarefas(JSON.parse(listaString));
  }
-}
-
-
+}catch (error) {
+  console.error("erro ao resgatar dados: ", error);
+}}
+useEffect(() => {
+    // O código aqui dentro rodará assim que o celular acender!
+    resgatarDadosLocal();
+}, []);
   return( 
       <View style={styles.container1}>
         
@@ -51,7 +59,7 @@ const salvarDadosLocal = async () => {
         />
 
 
-    <TouchableOpacity style={styles.botao} onPress={() => {adicionarTarefa(), salvarDadosLocal();}}>
+    <TouchableOpacity style={styles.botao} onPress={() => {adicionarTarefa(), salvarDadosLocal(listaTarefas);}}>
    
 <Text style={styles.mais}>+</Text>
 </TouchableOpacity>
